@@ -16,6 +16,8 @@ public interface BlogPostService {
 
     void deletePostById(Long id);
 
-//    List<BlogPost> getAllBlogPostsasList();
+    BlogPost findBlogPostById(Long id);
+
+    BlogPost editBlogPostById(Long id, BlogPost blogPost);
 
 }

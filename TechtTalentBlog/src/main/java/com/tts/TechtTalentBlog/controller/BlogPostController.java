@@ -1,27 +1,23 @@
 package com.tts.TechtTalentBlog.controller;
 
 import com.tts.TechtTalentBlog.model.BlogPost;
-import com.tts.TechtTalentBlog.repository.BlogPostRepository;
 import com.tts.TechtTalentBlog.service.BlogPostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Book;
+
 
 @Controller
+@RequestMapping("/blogposts")
 public class BlogPostController {
 
     @Autowired
     BlogPostService blogPostService;
 
-
-//    public BlogPostController(BlogPostService blogPostService) {
-//        this.blogPostService = blogPostService;
-//    }
-
-    @GetMapping("/")
+    @GetMapping
     public String index(BlogPost blogPost, Model model) {
         model.addAttribute("posts", blogPostService.getAllBlogPosts());
         // this return value is a reference to a template
@@ -29,31 +25,48 @@ public class BlogPostController {
         return "blogpost/index";
     }
 
-    @GetMapping("/blogposts/new")
+    @GetMapping("/new")
     public String newBlog(BlogPost blogPost) {
         return "blogpost/new";
     }
 
-    @PostMapping("/blogposts")
-    public String addNewBlogPost(BlogPost blogPost, Model model) {
+    @PostMapping
+    public String addNewBlogPost(BlogPost blogPost) {
         blogPostService.addNewBlogPost(blogPost);
-        model.addAttribute("title", blogPost.getTitle());
-        model.addAttribute("author", blogPost.getAuthor());
-        model.addAttribute("blogEntry", blogPost.getBlogEntry());
         return "blogpost/result";
     }
 
-    // method to check order by methods
-//    @GetMapping("/json")
-//    @ResponseBody
-//    public Iterable<Book> getAllDesc() {
-//        return blogPostRepository.findByOrderByTitleAsc();
+    @DeleteMapping("/{id}")
+    public String deletePostWithId(@PathVariable Long id) {
+        blogPostService.deletePostById(id);
+        return "redirect:/blogposts";
+    }
+
+    // this retrieves our post that we want to edit
+    // it'll send us to our edit template page
+    @GetMapping("/{id}")
+    public String editPostWithId(@PathVariable Long id, Model model) {
+
+        BlogPost foundPost = blogPostService.findBlogPostById(id);
+        model.addAttribute("blogPost", foundPost);
+        return "blogpost/edit";
+    }
+
+//    @ModelAttribute("blogPost")
+//    public BlogPost getBlogPost() {
+//        return new BlogPost();
 //    }
 
-    @DeleteMapping("/blogposts/{id}")
-    public String deletePostWithId(@PathVariable Long id, BlogPost blogPost) {
-        blogPostService.deletePostById(id);
-        return "redirect:/";
+    // this will perform the actual edit via a POST method
+    // this should technically be a put, but using a post is common and will work the same
+    @PostMapping("/update/{id}")
+    public String updateExistingPost(@PathVariable Long id,
+                                     BlogPost blogPost,
+                                     Model model) {
+
+        BlogPost editedPost = blogPostService.editBlogPostById(id, blogPost);
+        model.addAttribute("blogPost", editedPost);
+        return "blogpost/result";
     }
 
 
